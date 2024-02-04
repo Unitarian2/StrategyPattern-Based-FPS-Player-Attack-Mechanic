@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,17 +14,34 @@ public class WeaponController : MonoBehaviour
 
     //Weapon Settings
     [SerializeField] private BulletSettings bulletSettings;
+    public WeaponStrategy[] weaponsSlots;
 
     
     [SerializeField] WeaponUpgradeDefinition weaponUpgradeDefinition;
     [SerializeField] WeaponUpgradeDefinition weaponUpgradeDefinitionDamage;
     [SerializeField] WeaponUpgradeDefinition weaponUpgradeDefinitionRecklessDamage;
     public float weaponDamage;
-    IWeapon basicWeapon;
+    
+    Vector3 attackDirection;
+
+    //WeaponControllerObjectSettings
+    public MeshRenderer rifleRenderer;
+
+    //Equipped Weapon
+    public WeaponStrategy currentWeapon = null;
+
+    //Starter Owned Weapons
+    public VaultableShield shield;
+    public ThrowableStone stone;
+
+    //Held Weapons
+    IWeapon basicWeapon; // Tüfek, tabanca vs.
+    IVaultableWeapon vaultableWeapon; // Oyuncunun önüne çektiði shield vs.
+    IThrowableWeapon throwableWeapon; // Fýrlatýlabilir taþ, bomba vs.
 
     //Weapon Modules
     [SerializeField] private Transform barrelExitPoint;
-    [SerializeField] private GameObject weaponUpgradeSection;
+    
 
     //Weapon Base Stats
     public float baseWeaponDamage = 10;
@@ -34,7 +52,7 @@ public class WeaponController : MonoBehaviour
     public float currentWeaponRateOfFire;
 
     //Firing
-    private float lastTimeFired = 0f;
+    public float lastTimeFired = 0f;
     int layerMask = 1 << 0;
 
     //Gizmo Settings
@@ -44,15 +62,21 @@ public class WeaponController : MonoBehaviour
 
     private void Awake()
     {
-        
         basicWeapon = new BasicWeapon(this);
-
         GizmoRaydirection = transform.forward;
         upgradeController = GetComponent<WeaponUpgradeController>();
+        rifleRenderer = GetComponent<MeshRenderer>();
     }
 
     private void Start()
     {
+        //Baþlangýçta oyuncuya 1 shield ve 1 taþ verdik weapon olarak.
+        vaultableWeapon = shield;
+        throwableWeapon = stone;
+        
+
+        currentWeapon = weaponsSlots[0];
+
         currentWeaponDamage = baseWeaponDamage;
         currentWeaponRateOfFire = baseWeaponRateOfFire;
     }
@@ -60,20 +84,12 @@ public class WeaponController : MonoBehaviour
     private void OnEnable()
     {
         ReceiveInteraction.OnWeaponUpgradePickedUp += ReceiveInteraction_OnWeaponUpgradePickedUp;
+        
     }
 
     private void OnDisable()
     {
         ReceiveInteraction.OnWeaponUpgradePickedUp -= ReceiveInteraction_OnWeaponUpgradePickedUp;
-    }
-
-    private void Update()
-    {
-        // Ekran boyutlarýný al
-        
-
-        // Ray'i görselleþtirmek için Debug.DrawLine kullanabilirsiniz
-        //Debug.DrawLine(ray.origin, ray.origin + ray.direction * 10f, Color.blue);
     }
 
     private void ReceiveInteraction_OnWeaponUpgradePickedUp(WeaponUpgradeDefinition definition)
@@ -86,32 +102,18 @@ public class WeaponController : MonoBehaviour
                 IWeapon weaponWithDamageUpgrade = new WDamageUpgrade(basicWeapon, this, definition);
                 basicWeapon = weaponWithDamageUpgrade;
                 upgradeController.AddToUpgradeList(definition);
-                //IWeaponUpgrade newUpgrade = WeaponUpgradeFactory.Create(definition, null);
-                //if (newUpgrade is WeaponUpgrader upgrader)
-                //{
-                //    upgrader.Upgrade(currentWeaponUpgrade);
-                //    currentWeaponUpgrade = upgrader;
-                //}
+                
                 break;
             case WeaponUpgradeType.Firerate:
                 IWeapon weaponWithRateOfFireUpgrade = new WRateOfFireUpgrade(basicWeapon, this, definition);
                 basicWeapon = weaponWithRateOfFireUpgrade;
                 upgradeController.AddToUpgradeList(definition);
-                //IWeaponUpgrade newUpgrade2 = WeaponUpgradeFactory.Create(definition, playerMovement);
-                //if (newUpgrade2 is WeaponUpgrader upgrader2)
-                //{
-                //    upgrader2.Upgrade(currentWeaponUpgrade);
-                //    currentWeaponUpgrade = upgrader2;
-                //}
+                
                 break;
         }
-
-        //weaponDamage = currentWeaponUpgrade.GetModifier();
-
-        // Oluþturulan temel silah
     }
 
-    void FireWeapon()
+    public void UseWeapon()
     {
         //Her atýþta Decoration süreci çalýþtýðý için hasar deðerini base deðere eþitliyoruz ardýndan decoration çalýþýyor.
         currentWeaponDamage = baseWeaponDamage;
@@ -126,7 +128,6 @@ public class WeaponController : MonoBehaviour
         // Ekranýn ortasýndan bir ray oluþtur
         Ray ray = Camera.main.ScreenPointToRay(screenCenter);
 
-        //Ray ray = playerCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
         RaycastHit hit;
 
         Vector3 targetPoint;
@@ -139,20 +140,36 @@ public class WeaponController : MonoBehaviour
             targetPoint = ray.GetPoint(75);
         }
 
-        Vector3 attackDirection = targetPoint - GetWeaponBarrelExitPoint();
+        attackDirection = targetPoint - GetWeaponBarrelExitPoint();
         GizmoRaydirection = attackDirection;
-        basicWeapon.Fire(attackDirection);
+        //basicWeapon.Fire(attackDirection);
+        currentWeapon.FireEvent(this);
     }
 
-    void FixedUpdate()
-    {
-        if (Input.GetMouseButton(0) && Time.time >= lastTimeFired + (1 / currentWeaponRateOfFire)) 
-        {
-            FireWeapon();
-            lastTimeFired = Time.time;
-        }
+    
 
-        //Debug.Log(transform.forward);
+    public void EquipWeapon(int index)
+    {
+        if(currentWeapon != weaponsSlots[index])
+        {
+            currentWeapon = weaponsSlots[index];
+            SetupWeaponEquipVisuals(index);
+        }  
+    }
+
+     void SetupWeaponEquipVisuals(int equippedIndex)
+    {
+        for(int i = 0; i < weaponsSlots.Length; i++)
+        {
+            if(i != equippedIndex)
+            {
+                weaponsSlots[i].UnequipVisually(this);
+            }
+            else
+            {
+                weaponsSlots[i].EquipVisually(this);
+            }
+        }
     }
 
     public Vector3 GetWeaponBarrelExitPoint()
@@ -178,6 +195,24 @@ public class WeaponController : MonoBehaviour
     public Transform GetBulletSpawnParent()
     {
         return bulletSpawnParent.transform;
+    }
+
+    public IWeapon GetCurrentBulletWeapon()
+    {
+        return basicWeapon;
+    }
+    public IThrowableWeapon GetCurrentThrowableWeapon()
+    {
+        return throwableWeapon;
+    }
+    public IVaultableWeapon GetCurrentVaultableWeapon()
+    {
+        return vaultableWeapon;
+    }
+
+    public Vector3 GetLastAttackDirection()
+    {
+        return attackDirection;
     }
 
 }

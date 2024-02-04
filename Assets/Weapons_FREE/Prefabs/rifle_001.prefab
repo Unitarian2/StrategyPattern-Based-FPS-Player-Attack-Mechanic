@@ -241,6 +241,10 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: c0d77e676f3f0ef4ebbfb067fe81ae27,
         type: 3}
       insertIndex: -1
+      addedObject: {fileID: 9020069124388828269}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: c0d77e676f3f0ef4ebbfb067fe81ae27,
+        type: 3}
+      insertIndex: -1
       addedObject: {fileID: -1280058959441750331}
   m_SourcePrefab: {fileID: 100100000, guid: c0d77e676f3f0ef4ebbfb067fe81ae27, type: 3}
 --- !u!4 &3503643608116425843 stripped
@@ -272,6 +276,10 @@ MonoBehaviour:
   bulletFactory: {fileID: 0}
   bulletSpawnParent: {fileID: 0}
   bulletSettings: {fileID: 11400000, guid: 27467e71055851344b49d8de32a5ade2, type: 2}
+  weapons:
+  - {fileID: 11400000, guid: d028f15495f894a4badae919177bb8c9, type: 2}
+  - {fileID: 11400000, guid: d3d55e6257a8ad6429ab50d1216c47d6, type: 2}
+  - {fileID: 11400000, guid: f56976be28e7b8245b1f1d99f7fa7a20, type: 2}
   weaponUpgradeDefinition: {fileID: 11400000, guid: 14a833179c0605946bd12a0602ad8462,
     type: 2}
   weaponUpgradeDefinitionDamage: {fileID: 11400000, guid: 1e349e59b780fae418126ee4bdf244c8,
@@ -280,7 +288,6 @@ MonoBehaviour:
     type: 2}
   weaponDamage: 10
   barrelExitPoint: {fileID: 5799550394521411388}
-  weaponUpgradeSection: {fileID: 0}
   baseWeaponDamage: 10
   baseWeaponRateOfFire: 1
   currentWeaponDamage: 0
@@ -302,7 +309,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   upgradeList: []
   upgradeListShowable: []
-  upgradeVisualSocket: {fileID: 0}
+  upgradeVisualSocket: {fileID: 3865958197415412892}
+--- !u!114 &9020069124388828269
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4311248730837266121}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98d1be4c92bacc64f920ac6d553488b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!64 &-1280058959441750331
 MeshCollider:
   m_ObjectHideFlags: 0

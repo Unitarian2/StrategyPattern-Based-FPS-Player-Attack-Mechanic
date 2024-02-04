@@ -32,4 +32,31 @@ public class ObjectPuppetMaster : Singleton<ObjectPuppetMaster>
         }
     }
 
+    public IEnumerator StrafeToLeft(GameObject obj,float strafeAmount,float duration)
+    {
+        float timeElapsed = 0f;
+        Vector3 initialPos = obj.transform.position;
+        Vector3 finalPos = new Vector3(initialPos.x + strafeAmount, initialPos.y, initialPos.z);
+
+        while (timeElapsed < duration)
+        {
+            obj.transform.position = Vector3.Lerp(initialPos, finalPos, timeElapsed / duration);
+            timeElapsed += Time.deltaTime;
+            yield return null;
+        }
+    }
+    public IEnumerator StrafeToRight(GameObject obj, float strafeAmount, float duration)
+    {
+        float timeElapsed = 0f;
+        Vector3 initialPos = obj.transform.position;
+        Vector3 finalPos = new Vector3(initialPos.x - strafeAmount, initialPos.y, initialPos.z);
+
+        while (timeElapsed < duration)
+        {
+            obj.transform.position = Vector3.Lerp(initialPos, finalPos, timeElapsed / duration);
+            timeElapsed += Time.deltaTime;
+            yield return null;
+        }
+    }
+    
 }
