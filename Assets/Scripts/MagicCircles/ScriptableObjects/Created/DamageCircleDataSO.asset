@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d89af7984154b3c449f2aa5e22781ad2, type: 3}
+  m_Name: DamageCircleDataSO
+  m_EditorClassIdentifier: 
+  amount: 7
+  type: 0
+  lifeSpan: 10
+  prefab: {fileID: 3582536479446097290, guid: d9b0298ee54544445b6a6c2bb882acaa, type: 3}
